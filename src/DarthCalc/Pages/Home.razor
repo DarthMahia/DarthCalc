@@ -1,0 +1,148 @@
+@page "/"
+
+<div class="row">
+    <div class="d-grid gap-2 col mx-auto">
+        <InputNumber class="form-control" @bind-Value="Value" />
+    </div>
+    <div class="d-grid gap-2 col-3 mx-auto">
+        <button class="btn btn-dark" @onclick="Divide">/</button>
+    </div>
+</div>
+<div class="row">
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(7)">7</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(8)">8</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(9)">9</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="Multiply">x</button>
+    </div>
+</div>
+<div class="row">
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(4)">4</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(5)">5</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(6)">6</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="Minus">-</button>
+    </div>
+</div>
+<div class="row">
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(1)">1</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(2)">2</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(3)">3</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="Plus">+</button>
+    </div>
+</div>
+<div class="row">
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" ></button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="() => Set(0)">0</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark">.</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark" @onclick="Result">=</button>
+    </div>
+</div>
+
+@code {
+    double memory;
+    Action? action;
+    bool reset;
+
+    double Value { get; set; }
+
+    void Set(int value)
+    {
+        if (reset)
+        {
+            Value = 0;
+            reset = false;
+        }
+        Value = (Value * 10) + value;
+    }
+
+    void Plus()
+    {
+        Compute();
+        action = Action.Plus;
+    }
+
+    void Minus()
+    {
+        Compute();
+        action = Action.Minus;
+    }
+
+    void Multiply()
+    {
+        Compute();
+        action = Action.Multiply;
+    }
+
+    void Divide()
+    {
+        Compute();
+        action = Action.Divide;
+    }
+
+
+    void Result()
+    {
+        Compute();
+        Value = memory;
+        memory = 0;
+        action = null;        
+    }
+
+    void Compute()
+    {
+        switch (action)
+        {
+            case Action.Plus:
+                memory += Value;
+                break;
+            case Action.Minus:
+                memory -= Value;
+                break;
+            case Action.Multiply:
+                memory *= Value;
+                break;
+            case Action.Divide:
+                memory /= Value;
+                break;
+            default:
+                memory = Value;
+                break;
+        }
+        reset = true;
+    }
+
+    enum Action
+    {
+        Plus,
+        Minus,
+        Multiply,
+        Divide
+    }
+}
