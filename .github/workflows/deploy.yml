@@ -37,8 +37,10 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 9.0.x
-      - name: Publish app
-        run: dotnet publish src/DarthCalc/DarthCalc.csproj
+      - name: Publish blazor
+        run: dotnet publish src/DarthCalc -c Release
+      - name: Publish maui
+        run: dotnet publish src/DarthCalc.MauiApp  -f:net9.0-android -c:Release /p:AndroidSigningKeyPass=${{ secret.SIGNAPK }} -o ${{ env.PUBLISH_DIR }}
       - name: Rewrite base href
         uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
         with:
