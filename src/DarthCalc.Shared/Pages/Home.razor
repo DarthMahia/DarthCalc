@@ -1,64 +1,68 @@
 ﻿@page "/"
+@using System.Globalization
 
 <div class="row">
     <div class="d-grid gap-2 col mx-auto">
-        <InputNumber class="form-control" @bind-Value="Value" />
+        <div class="input-group">
+            <InputText class="form-control" @bind-Value="Value" disabled="true" />
+            <button class="btn btn-outline-secondary" type="button" @onclick="Back">&lt;</button>
+        </div>
     </div>
     <div class="d-grid gap-2 col-3 mx-auto">
-        <button class="btn btn-dark" @onclick="Divide">/</button>
+        <button class="btn btn-dark m-1" @onclick="Divide">/</button>
     </div>
 </div>
 <div class="row">
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(7)">7</button>
+        <button class="btn btn-dark m-1" @onclick="() => Set(7)">7</button>
     </div>
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(8)">8</button>
+        <button class="btn btn-dark m-1" @onclick="() => Set(8)">8</button>
     </div>
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(9)">9</button>
+        <button class="btn btn-dark m-1" @onclick="() => Set(9)">9</button>
     </div>
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="Multiply">x</button>
-    </div>
-</div>
-<div class="row">
-    <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(4)">4</button>
-    </div>
-    <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(5)">5</button>
-    </div>
-    <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(6)">6</button>
-    </div>
-    <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="Minus">-</button>
+        <button class="btn btn-dark m-1" @onclick="Multiply">x</button>
     </div>
 </div>
 <div class="row">
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(1)">1</button>
+        <button class="btn btn-dark m-1" @onclick="() => Set(4)">4</button>
     </div>
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(2)">2</button>
+        <button class="btn btn-dark m-1" @onclick="() => Set(5)">5</button>
     </div>
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(3)">3</button>
+        <button class="btn btn-dark m-1" @onclick="() => Set(6)">6</button>
     </div>
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="Plus">+</button>
+        <button class="btn btn-dark m-1" @onclick="Minus">-</button>
     </div>
 </div>
 <div class="row">
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" ></button>
+        <button class="btn btn-dark m-1" @onclick="() => Set(1)">1</button>
     </div>
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark" @onclick="() => Set(0)">0</button>
+        <button class="btn btn-dark m-1" @onclick="() => Set(2)">2</button>
     </div>
     <div class="d-grid gap-2 col mx-auto">
-        <button class="btn btn-dark">.</button>
+        <button class="btn btn-dark m-1" @onclick="() => Set(3)">3</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark m-1" @onclick="Plus">+</button>
+    </div>
+</div>
+<div class="row">
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark m-1" ></button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark m-1" @onclick="() => Set(0)">0</button>
+    </div>
+    <div class="d-grid gap-2 col mx-auto">
+        <button class="btn btn-dark m-1" @onclick="Decimal" disabled="@WriteDecimal">.</button>
     </div>
     <div class="d-grid gap-2 col mx-auto">
         <button class="btn btn-outline-dark" @onclick="Result">=</button>
@@ -66,20 +70,42 @@
 </div>
 
 @code {
-    double memory;
+    double? memory;
     Action? action;
     bool reset;
 
-    double Value { get; set; }
+    string Value { get; set; } = "0";
 
-    void Set(int value)
+    bool WriteDecimal => Value.IndexOf(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator) > 0;
+
+    void Set(int digit)
     {
         if (reset)
         {
-            Value = 0;
+            Value = "0";
             reset = false;
         }
-        Value = (Value * 10) + value;
+
+        if (Value == "0")
+        {
+            Value = digit.ToString();
+        }
+        else
+        {
+            Value += digit.ToString();
+        }
+    }
+
+    void Back()
+    {
+        if (Value.Length == 1)
+        {
+            Value = "0";
+        }
+        else
+        {
+            Value = Value.Substring(0, Value.Length - 1);
+        }
     }
 
     void Plus()
@@ -106,36 +132,48 @@
         action = Action.Divide;
     }
 
+    void Decimal()
+    {
+        Value += CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+    }
 
     void Result()
     {
         Compute();
-        Value = memory;
-        memory = 0;
+        Value = memory!.Value.ToString();
+        memory = null;
         action = null;        
     }
 
     void Compute()
     {
+        var currentValue = double.Parse(Value);
+
         switch (action)
         {
             case Action.Plus:
-                memory += Value;
+                memory += currentValue;
                 break;
             case Action.Minus:
-                memory -= Value;
+                memory -= currentValue;
                 break;
             case Action.Multiply:
-                memory *= Value;
+                memory *= currentValue;
                 break;
             case Action.Divide:
-                memory /= Value;
+                memory /= currentValue;
                 break;
             default:
-                memory = Value;
+                memory = currentValue;
                 break;
         }
         reset = true;
+    }
+
+    int NumberOfDecimals(double value)
+    {
+        var indexOfDecimal = value.ToString().IndexOf(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+        return indexOfDecimal > 0 ? value.ToString().Length - indexOfDecimal - 1 : 0;
     }
 
     enum Action
